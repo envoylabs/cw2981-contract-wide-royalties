@@ -27,7 +27,7 @@
     },
     "royalty_percentage": {
       "type": "integer",
-      "format": "uint64",
+      "format": "uint32",
       "minimum": 0.0
     },
     "symbol": {
