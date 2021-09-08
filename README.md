@@ -1,3 +1,5 @@
+![Build and Test](https://github.com/envoylabs/cw2981-contract-wide-royalties/actions/workflows/build_and_test.yml/badge.svg)
+
 # CW2981 Contract-wide Royalties
 
 An example of porting EIP2981 to implement royalties at a per-contract level.
