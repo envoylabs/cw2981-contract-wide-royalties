@@ -15,3 +15,14 @@ pub enum ContractError {
     #[error("Cannot set approval that is already expired")]
     Expired {},
 }
+
+impl From<cw721_base::ContractError> for ContractError {
+    fn from(err: cw721_base::ContractError) -> Self {
+        match err {
+            cw721_base::ContractError::Std(error) => ContractError::Std(error),
+            cw721_base::ContractError::Unauthorized {} => ContractError::Unauthorized {},
+            cw721_base::ContractError::Claimed {} => ContractError::Claimed {},
+            cw721_base::ContractError::Expired {} => ContractError::Expired {},
+        }
+    }
+}

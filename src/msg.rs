@@ -1,5 +1,5 @@
-use cosmwasm_std::{Binary, Coin};
-use cw721::Expiration;
+use cosmwasm_std::Coin;
+
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -19,57 +19,6 @@ pub struct InstantiateMsg {
     pub royalty_payments: bool,
     pub royalty_percentage: u32,
     pub royalty_payment_address: String,
-}
-
-/// This is like Cw721ExecuteMsg but we add a Mint command for an owner
-/// to make this stand-alone. You will likely want to remove mint and
-/// use other control logic in any contract that inherits this.
-#[derive(Serialize, Deserialize, Clone, PartialEq, JsonSchema, Debug)]
-#[serde(rename_all = "snake_case")]
-pub enum ExecuteMsg {
-    /// Transfer is a base message to move a token to another account without triggering actions
-    TransferNft { recipient: String, token_id: String },
-    /// Send is a base message to transfer a token to a contract and trigger an action
-    /// on the receiving contract.
-    SendNft {
-        contract: String,
-        token_id: String,
-        msg: Binary,
-    },
-    /// Allows operator to transfer / send the token from the owner's account.
-    /// If expiration is set, then this allowance has a time/height limit
-    Approve {
-        spender: String,
-        token_id: String,
-        expires: Option<Expiration>,
-    },
-    /// Remove previously granted Approval
-    Revoke { spender: String, token_id: String },
-    /// Allows operator to transfer / send any token from the owner's account.
-    /// If expiration is set, then this allowance has a time/height limit
-    ApproveAll {
-        operator: String,
-        expires: Option<Expiration>,
-    },
-    /// Remove previously granted ApproveAll permission
-    RevokeAll { operator: String },
-
-    /// Mint a new NFT, can only be called by the contract minter
-    Mint(MintMsg),
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct MintMsg {
-    /// Unique ID of the NFT
-    pub token_id: String,
-    /// The owner of the newly minter NFT
-    pub owner: String,
-    /// Identifies the asset to which this NFT represents
-    pub name: String,
-    /// Describes the asset to which this NFT represents (may be empty)
-    pub description: Option<String>,
-    /// A URI pointing to an image representing the asset
-    pub image: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

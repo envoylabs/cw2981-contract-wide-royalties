@@ -3,11 +3,12 @@ use std::fs::create_dir_all;
 
 use cosmwasm_schema::{export_schema, remove_schemas, schema_for};
 
-use cw2981_contract_wide_royalties::msg::{ExecuteMsg, InstantiateMsg, MinterResponse, QueryMsg};
+use cw2981_contract_wide_royalties::msg::{InstantiateMsg, QueryMsg};
 use cw721::{
     AllNftInfoResponse, ApprovedForAllResponse, ContractInfoResponse, NftInfoResponse,
     NumTokensResponse, OwnerOfResponse, TokensResponse,
 };
+use cw721_base::msg::{ExecuteMsg, MinterResponse};
 
 fn main() {
     let mut out_dir = current_dir().unwrap();
