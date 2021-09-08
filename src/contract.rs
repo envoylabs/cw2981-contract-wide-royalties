@@ -2,7 +2,7 @@
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
     coin, to_binary, Binary, BlockInfo, Coin, Deps, DepsMut, Env, MessageInfo, Order, Pair,
-    Response, StdError, StdResult, Uint128,
+    Response, StdError, StdResult,
 };
 
 use cw0::maybe_addr;
@@ -585,7 +585,7 @@ fn humanize_approval(approval: &Approval) -> cw721::Approval {
 #[cfg(test)]
 mod tests {
     use cosmwasm_std::testing::{mock_dependencies, mock_env, mock_info};
-    use cosmwasm_std::{from_binary, CosmosMsg, WasmMsg};
+    use cosmwasm_std::{from_binary, CosmosMsg, Uint128, WasmMsg};
 
     use super::*;
     use cw721::ApprovedForAllResponse;
