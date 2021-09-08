@@ -38,6 +38,17 @@ pub fn instantiate(
 ) -> StdResult<Response> {
     set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
 
+    // a little sense check for somebody attempting something strange
+    if msg.royalty_payments
+        && (msg.royalty_percentage.is_none() || msg.royalty_payment_address.is_none())
+    {
+        return Err(StdError::GenericErr {
+            msg: String::from(
+                "Argument error: royalty_percentage and royalty_payment_address required",
+            ),
+        });
+    }
+
     let info = ContractInfoResponse {
         name: msg.name,
         symbol: msg.symbol,
@@ -47,7 +58,10 @@ pub fn instantiate(
     let minter = deps.api.addr_validate(&msg.minter)?;
     MINTER.save(deps.storage, &minter)?;
 
-    let payment_address = deps.api.addr_validate(&msg.royalty_payment_address)?;
+    let payment_address = match msg.royalty_payment_address {
+        Some(addr) => Some(deps.api.addr_validate(&addr)?),
+        None => None,
+    };
     let royalties_info = RoyaltiesInfo {
         royalty_payments: msg.royalty_payments,
         royalty_percentage: msg.royalty_percentage,
@@ -153,10 +167,28 @@ pub fn query_royalties_info(
     sale_price: Coin,
 ) -> StdResult<RoyaltiesInfoResponse> {
     let royalties_info = ROYALTIES_INFO.load(deps.storage)?;
-    let percentage = Percentage::from(royalties_info.royalty_percentage);
-    let royalty_from_sale_price = percentage.apply_to(sale_price.amount.u128());
+
+    // if not configured, throw straight away
+    if !royalties_info.royalty_payments {
+        return Err(StdError::NotFound {
+            kind: String::from("Royalties not set for this contract"),
+        });
+    }
+
+    // these set defaults but will never be returned if royalty_payments
+    // is not configured
+    let royalty_percentage = match royalties_info.royalty_percentage {
+        Some(pct) => Percentage::from(pct),
+        None => Percentage::from(0),
+    };
+    let royalty_from_sale_price = royalty_percentage.apply_to(sale_price.amount.u128());
+
+    let royalty_address = match royalties_info.royalty_payment_address {
+        Some(addr) => addr.to_string(),
+        None => String::from(""),
+    };
     Ok(RoyaltiesInfoResponse {
-        address: royalties_info.royalty_payment_address.to_string(),
+        address: royalty_address,
         royalty_amount: coin(royalty_from_sale_price, sale_price.denom),
     })
 }
@@ -339,8 +371,8 @@ mod tests {
             symbol: SYMBOL.to_string(),
             minter: String::from(MINTER),
             royalty_payments: true,
-            royalty_percentage: royalty_percentage,
-            royalty_payment_address: String::from(MINTER),
+            royalty_percentage: Some(royalty_percentage),
+            royalty_payment_address: Some(String::from(MINTER)),
         };
         let info = mock_info("creator", &[]);
         let res = instantiate(deps, mock_env(), info, msg).unwrap();
@@ -354,6 +386,32 @@ mod tests {
     }
 
     #[test]
+    fn failing_instantiation() {
+        let mut deps = mock_dependencies(&[]);
+
+        let msg = InstantiateMsg {
+            name: CONTRACT_NAME.to_string(),
+            symbol: SYMBOL.to_string(),
+            minter: String::from(MINTER),
+            royalty_payments: true,
+            royalty_percentage: None,
+            royalty_payment_address: Some(String::from(MINTER)),
+        };
+        let info = mock_info("creator", &[]);
+
+        // we can just call .unwrap() to assert this was a success
+        let res = instantiate(deps.as_mut(), mock_env(), info, msg).unwrap_err();
+        assert_eq!(
+            res,
+            StdError::GenericErr {
+                msg: String::from(
+                    "Argument error: royalty_percentage and royalty_payment_address required"
+                ),
+            }
+        );
+    }
+
+    #[test]
     fn proper_instantiation() {
         let mut deps = mock_dependencies(&[]);
 
@@ -362,8 +420,8 @@ mod tests {
             symbol: SYMBOL.to_string(),
             minter: String::from(MINTER),
             royalty_payments: true,
-            royalty_percentage: 10,
-            royalty_payment_address: String::from(MINTER),
+            royalty_percentage: Some(10),
+            royalty_payment_address: Some(String::from(MINTER)),
         };
         let info = mock_info("creator", &[]);
 

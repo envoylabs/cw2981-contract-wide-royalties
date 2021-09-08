@@ -17,8 +17,8 @@ pub struct InstantiateMsg {
 
     // params related to royalties
     pub royalty_payments: bool,
-    pub royalty_percentage: u32,
-    pub royalty_payment_address: String,
+    pub royalty_percentage: Option<u32>,
+    pub royalty_payment_address: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]

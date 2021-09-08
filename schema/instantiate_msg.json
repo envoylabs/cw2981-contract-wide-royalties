@@ -5,9 +5,7 @@
   "required": [
     "minter",
     "name",
-    "royalty_payment_address",
     "royalty_payments",
-    "royalty_percentage",
     "symbol"
   ],
   "properties": {
@@ -20,13 +18,19 @@
       "type": "string"
     },
     "royalty_payment_address": {
-      "type": "string"
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "royalty_payments": {
       "type": "boolean"
     },
     "royalty_percentage": {
-      "type": "integer",
+      "type": [
+        "integer",
+        "null"
+      ],
       "format": "uint32",
       "minimum": 0.0
     },
