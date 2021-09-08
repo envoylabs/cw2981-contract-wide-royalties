@@ -1,8 +1,8 @@
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{
-    coin, to_binary, Binary, BlockInfo, Coin, Deps, DepsMut, Env, MessageInfo, Order, Pair,
-    Response, StdError, StdResult,
+    to_binary, Binary, BlockInfo, Deps, DepsMut, Env, MessageInfo, Order, Pair, Response, StdError,
+    StdResult,
 };
 
 use cw0::maybe_addr;
@@ -164,7 +164,7 @@ pub fn query(deps: Deps, env: Env, msg: QueryMsg) -> StdResult<Binary> {
 pub fn query_royalties_info(
     deps: Deps,
     _token_id: String,
-    sale_price: Coin,
+    sale_price: u128,
 ) -> StdResult<RoyaltiesInfoResponse> {
     let royalties_info = ROYALTIES_INFO.load(deps.storage)?;
 
@@ -181,7 +181,7 @@ pub fn query_royalties_info(
         Some(pct) => Percentage::from(pct),
         None => Percentage::from(0),
     };
-    let royalty_from_sale_price = royalty_percentage.apply_to(sale_price.amount.u128());
+    let royalty_from_sale_price = royalty_percentage.apply_to(sale_price);
 
     let royalty_address = match royalties_info.royalty_payment_address {
         Some(addr) => addr.to_string(),
@@ -189,7 +189,7 @@ pub fn query_royalties_info(
     };
     Ok(RoyaltiesInfoResponse {
         address: royalty_address,
-        royalty_amount: coin(royalty_from_sale_price, sale_price.denom),
+        royalty_amount: royalty_from_sale_price,
     })
 }
 
@@ -507,14 +507,14 @@ mod tests {
         let queried_royalties_info = query_royalties_info(
             deps.as_ref(),
             token_id.clone(),
-            coin(Uint128::new(1_000_000).u128(), "ujuno"),
+            Uint128::new(1_000_000).u128(),
         )
         .unwrap();
         assert_eq!(
             queried_royalties_info,
             RoyaltiesInfoResponse {
                 address: String::from(MINTER),
-                royalty_amount: coin(Uint128::new(100_000).u128(), "ujuno")
+                royalty_amount: Uint128::new(100_000).u128()
             }
         );
 
@@ -581,14 +581,14 @@ mod tests {
         let queried_royalties_info = query_royalties_info(
             deps.as_ref(),
             token_id.clone(),
-            coin(Uint128::new(1_321_322).u128(), "ujuno"),
+            Uint128::new(1_321_322).u128(),
         )
         .unwrap();
         assert_eq!(
             queried_royalties_info,
             RoyaltiesInfoResponse {
                 address: String::from(MINTER),
-                royalty_amount: coin(Uint128::new(92_492).u128(), "ujuno")
+                royalty_amount: Uint128::new(92_492).u128()
             }
         );
 
@@ -645,14 +645,14 @@ mod tests {
         let queried_royalties_info = query_royalties_info(
             deps.as_ref(),
             token_id.clone(),
-            coin(Uint128::new(1_321_321).u128(), "ujuno"),
+            Uint128::new(1_321_321).u128(),
         )
         .unwrap();
         assert_eq!(
             queried_royalties_info,
             RoyaltiesInfoResponse {
                 address: String::from(MINTER),
-                royalty_amount: coin(Uint128::new(92_492).u128(), "ujuno")
+                royalty_amount: Uint128::new(92_492).u128()
             }
         );
 

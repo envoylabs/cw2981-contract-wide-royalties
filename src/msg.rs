@@ -1,5 +1,3 @@
-use cosmwasm_std::Coin;
-
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -30,7 +28,10 @@ pub enum QueryMsg {
     RoyaltyInfo {
         token_id: String,
         // the denom of this sale must also be the denom returned by RoyaltiesInfoResponse
-        sale_price: Coin,
+        // this was originally implemented as a Coin
+        // however that would mean you couldn't buy using CW20s
+        // as CW20 is just mapping of addr -> balance
+        sale_price: u128,
     },
     // Called against the contract to determine if NFTs minted by it
     // implement royalties
@@ -104,7 +105,7 @@ pub struct RoyaltiesInfoResponse {
     pub address: String,
     // Note that this must be the same denom as that passed in to RoyaltyInfo
     // rounding up or down is at the discretion of the implementer
-    pub royalty_amount: Coin,
+    pub royalty_amount: u128,
 }
 
 /// Shows if the contract implements royalties
