@@ -1,8 +1,8 @@
 ![Build and Test](https://github.com/envoylabs/cw2981-contract-wide-royalties/actions/workflows/build_and_test.yml/badge.svg)
 
-# CW2981 Contract-wide Royalties
+# CW-2981 Contract-wide Royalties
 
-An example of porting EIP2981 to implement royalties at a per-contract level.
+An example of porting EIP-2981 to implement royalties at a per-contract level.
 
 Exposes a new query message type:
 
@@ -15,6 +15,9 @@ RoyaltyInfo {
     // the denom of this sale must also be the denom returned by RoyaltiesInfoResponse
     sale_price: Coin,
 },
+
+// Called against the contract to signal that CW-2981 is implemented
+CheckRoyalties {},
 ```
 
 Note that as this is contract-wide, `token_id` is required but ignored.
